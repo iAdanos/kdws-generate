@@ -1,0 +1,8 @@
+  <listitem>
+    <variable name="Id">ID</variable>
+    <variable name="Enabled">1</variable>
+    <variable name="Desc"></variable>
+    <variable name="Name">NAME</variable>
+    <variable name="Value">'VALUE'</variable>
+    <variable name="SharedId">0</variable>
+  </listitem>

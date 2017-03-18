@@ -1,0 +1,105 @@
+#!/bin/bash
+# -----
+# KDWS-Generate: Generate IP and domain lists with Microsoft Windows Telemetry hosts for Kerio Control
+# ----
+# Usage: kdws-generate 999
+# Where: 999 - id of the last entry in your IP Groups list
+# -----
+# IP and domain lists are get from "DWS Lite" by Nummer (github.com/Nummer/Destroy-Windows-10-Spying) // We all thank you, Nummer!
+# -----
+# Author: Adanos Flamel, SCI
+# -----
+# 2017
+# -----
+
+echo -e "[KDWS]: Initializing."
+
+# Variables
+dependenciesUtilites=([0]=cat [1]=sed [2]=egrep [3]=tac [4]=wc [5]=awk) # Dependencies: Utilites
+dependenciesDataFiles=([0]=data/kdws-item [1]=data/kdws-list-domain [2]=data/kdws-list-ip) # Dependencies: Data Files
+lastIpID=0 # Last entry ID in IP Groups section of winroute.cfg
+
+echo -e "[KDWS]: Checking dependencies."
+
+# Checking dependencies: Utilites
+for ((counter = 0; counter < ${#dependenciesUtilites[@]}; counter++)); do
+	if [[ -z "$(which ${dependenciesUtilites[$counter]})" ]]; then
+		echo -e "[KDWS]: Error! Script needs \"${dependenciesUtilites[$counter]}\" utility to work. \n Will now exit."
+		exit 1
+	fi
+done
+unset counter
+
+# Checking dependencies: Data Files
+for ((counter = 0; counter < ${#dependenciesDataFiles[@]}; counter++)); do
+	if [[ ! -r "$PWD/${dependenciesDataFiles[$counter]}" ]]; then
+		echo -e "[KDWS]: Error! Script needs \"${dependenciesDataFiles[$counter]}\" file to work. \n Make sure you run script from his directory. \n Will now exit."
+		exit 2
+	fi
+done
+unset counter
+
+echo -e "[KDWS]: Checking last ID argument."
+
+# Check last id is set
+if [[ -z $1 ]]; then
+    echo -e "[KDWS]: Warning! Your last IP Groups entry is not set. \n Assuming it is 1."
+    sleep 2
+    lastIpID=1
+else
+	echo -e "[KDWS]: Your last entry ID is $1."
+	lastIpID=$1;
+fi
+
+echo -e "[KDWS]: Checking output directory."
+
+# Checking result directory existance
+if [[ ! -d "$PWD/output" ]]; then
+	
+	mkdir output
+	if [[ $? -ne 0 ]]; then
+		echo -e "[KDWS]: Error creating output directory. \n Will now exit."
+		exit 3
+	fi
+
+	echo -n "" > output/kdws-result
+fi
+
+echo -e "[KDWS]: Processing domains list."
+
+# Processing domains list
+for ((counter = 1; counter <= $(wc -l data/kdws-list-domain | awk '{ print $1 }')+1; counter++)); do
+
+	# Caclulate entry ID
+	let entryID=$counter+$lastIpID
+
+	# Get domain from list (by string number)
+	entryValue=$(cat data/kdws-list-domain | egrep . --max-count=$counter | tac | egrep . --max-count=1)
+
+	# Process template and write result
+	cat data/kdws-item	| sed -e "s/ID/$entryID/" | sed -e "s/VALUE/$entryValue/" | sed -e "s/NAME/Microsoft Telemetry - Domains/" >> output/kdws-result
+
+done
+
+# Change last IP ID to continue
+lastIpID=$entryID
+unset counter
+
+echo -e "[KDWS]: Processing IP list."
+
+# Processing IP list
+for ((counter = 1; counter <= $(wc -l data/kdws-list-ip | awk '{ print $1 }')+1; counter++)); do
+
+	# Caclulate entry ID
+	let entryID=$counter+$lastIpID
+
+	# Get domain from list (by string number)
+	entryValue=$(cat data/kdws-list-ip | egrep . --max-count=$counter | tac | egrep . --max-count=1)
+
+	# Process template and write result
+	cat data/kdws-item	| sed -e "s/ID/$entryID/" | sed -e "s/VALUE/$entryValue/" | sed -e "s/NAME/Microsoft Telemetry - IP/" >> output/kdws-result
+
+done
+
+echo -e "[KDWS]: Done."
+exit 0
