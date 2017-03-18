@@ -20,6 +20,6 @@ Where: 999 - ID of your last entry in IP groups config part.
 
 -----
 
-Списки IP и доменов взяты из [DWS Lite](https://github.com/Nummer/Destroy-Windows-10-Spying), за что ему огромное спасибо.
+Списки IP и доменов взяты из [DWS Lite](https://github.com/Nummer/Destroy-Windows-10-Spying), за что огромное спасибо создателям.
 
 Скорее всего, репозиторий не будет поддерживаться, но его можно форкать и отправлять пулл-реквесты.
